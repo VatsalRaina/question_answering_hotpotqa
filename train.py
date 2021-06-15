@@ -126,12 +126,14 @@ def main(args):
             sentence_num = supp[1]
             if title == sample["context"][0][0]:
                 if sentence_num >= len(sample["context"][0][1]):
-                    print(sample)
-                assert sentence_num < len(sample["context"][0][1])
+                    print("Sentence does not exist in context")
+                    continue
                 sentence = sample["context"][0][1][sentence_num]
             else:
                 assert title == sample["context"][1][0]
-                assert sentence_num < len(sample["context"][1][1])
+                if sentence_num >= len(sample["context"][0][1]):
+                    print("Sentence does not exist in context")
+                    continue
                 sentence = sample["context"][1][1][sentence_num]
             supp_ids = tokenizer.encode(sentence)[1:-1]
             start_pos, _ = _find_sub_list(supp_ids, inp_ids)
