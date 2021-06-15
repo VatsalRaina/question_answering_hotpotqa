@@ -131,7 +131,7 @@ def main(args):
                 sentence = sample["context"][0][1][sentence_num]
             else:
                 assert title == sample["context"][1][0]
-                if sentence_num >= len(sample["context"][0][1]):
+                if sentence_num >= len(sample["context"][1][1]):
                     print("Sentence does not exist in context")
                     continue
                 sentence = sample["context"][1][1][sentence_num]
