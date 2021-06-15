@@ -111,7 +111,7 @@ def main(args):
             start_idx, end_idx = 0, 0
         else:
             ans_typ = 2
-            ans_ids = tokenizer.encode(answer)
+            ans_ids = tokenizer.encode(answer)[1:-1]
             start_idx, end_idx = _find_sub_list(ans_ids, inp_ids)
             if start_idx == -1:
                 print("Didn't find answer")
@@ -129,7 +129,7 @@ def main(args):
             else:
                 assert title == sample["context"][1][0]
                 sentence = sample["context"][1][1][sentence_num]
-            supp_ids = tokenizer.encode(sentence)
+            supp_ids = tokenizer.encode(sentence)[1:-1]
             start_pos, _ = _find_sub_list(supp_ids, inp_ids)
             if start_idx == -1:
                 print("Didn't find supporting fact")
