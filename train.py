@@ -54,7 +54,7 @@ def _find_sub_list(sl,l):
     for ind in (i for i,e in enumerate(l) if e==sl[0]):
         if l[ind:ind+sll]==sl:
             return ind,ind+sll-1
-    print("Didn't find match, return <no answer>")
+    # print("Didn't find match, return <no answer>")
     return -1,0
 
 def main(args):
@@ -89,11 +89,11 @@ def main(args):
     token_type_ids = []
 
     count = 0
+    print(len(all_samples))
     for sample in all_samples:
         count+=1
-        # if count==10:
-        #     break
-
+        if count%100==0:
+            print(count)
         question = sample["question"]
         context = "".join(sample["context"][0][1]) + " " + "".join(sample["context"][1][1])
         combo = question + " [SEP] " + context
@@ -114,6 +114,9 @@ def main(args):
             ans_ids = tokenizer.encode(answer)
             start_idx, end_idx = _find_sub_list(ans_ids, inp_ids)
             if start_idx == -1:
+                print("Didn't find answer")
+                print(answer)
+                print(context)
                 continue
 
         # Get positions of supporting facts with 1s at all positions with the sentence start corresponding to a supporting fact
@@ -128,8 +131,15 @@ def main(args):
                 sentence = sample["context"][1][1][sentence_num]
             supp_ids = tokenizer.encode(sentence)
             start_pos, _ = _find_sub_list(supp_ids, inp_ids)
+            if start_idx == -1:
+                print("Didn't find supporting fact")
+                print(sentence)
+                print(context)
+                continue
             supp_start_idxs.append(start_pos)
         # Build the vector
+        if -1 in supp_start_idxs:
+            continue
         supp_start_vec = [1 if i in supp_start_idxs else 0 for i in range(len(inp_ids))]
 
         start_positions_true.append(start_idx)
