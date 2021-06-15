@@ -125,6 +125,8 @@ def main(args):
             title = supp[0]
             sentence_num = supp[1]
             if title == sample["context"][0][0]:
+                if sentence_num >= len(sample["context"][0][1]):
+                    print(sample)
                 assert sentence_num < len(sample["context"][0][1])
                 sentence = sample["context"][0][1][sentence_num]
             else:
