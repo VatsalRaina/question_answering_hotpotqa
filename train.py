@@ -92,6 +92,8 @@ def main(args):
     print(len(all_samples))
     for sample in all_samples:
         count+=1
+        if count > 500:
+            break
         if count%100==0:
             print(count)
         question = sample["question"]
@@ -161,7 +163,7 @@ def main(args):
     end_positions_true = torch.tensor(end_positions_true)
     end_positions_true = end_positions_true.long().to(device)
     supporting_facts_start_positions_vector_true = torch.tensor(supporting_facts_start_positions_vector_true)
-    supporting_facts_start_positions_vector_true = supporting_facts_start_positions_vector_true.long().to(device)
+    supporting_facts_start_positions_vector_true = supporting_facts_start_positions_vector_true.float32().to(device)
     answer_type_true = torch.tensor(answer_type_true)
     answer_type_true = answer_type_true.long().to(device)
     input_ids = torch.tensor(input_ids)
