@@ -224,6 +224,7 @@ def main(args):
             loss_ansTyp = criterion_ansTyp(ansTyp_logits, b_ans_typ)
             loss_suppFacts = criterion_suppFacts(suppFacts_logits, b_supp_facts_vec)
             loss = loss_qa + loss_ansTyp + loss_suppFacts
+            print(loss)
             total_loss += loss.item()
 
             optimizer.zero_grad()
