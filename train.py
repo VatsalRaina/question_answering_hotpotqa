@@ -221,8 +221,11 @@ def main(args):
             loss_start = criterion_qa(start_logits, b_start_pos_true)
             loss_end = criterion_qa(end_logits, b_end_pos_true)
             loss_qa = (loss_start + loss_end) / 2
+            print("loss_qa", loss_qa)
             loss_ansTyp = criterion_ansTyp(ansTyp_logits, b_ans_typ)
+            print("loss_ansTyp", loss_ansTyp)
             loss_suppFacts = criterion_suppFacts(suppFacts_logits, b_supp_facts_vec)
+            print("loss_suppFacts", loss_suppFacts)
             loss = loss_qa + loss_ansTyp + loss_suppFacts
             print(loss)
             total_loss += loss.item()
