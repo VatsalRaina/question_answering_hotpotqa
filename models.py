@@ -15,7 +15,7 @@ class ElectraAnsTypHead(torch.nn.Module):
         self.electra = ElectraModel.from_pretrained(electra_large)
         self.dense = torch.nn.Linear(self.electra.config.hidden_size, self.electra.config.hidden_size)
         self.dropout = torch.nn.Dropout(self.electra.config.hidden_dropout_prob)
-        self.out_proj = torch.nn.Linear(self.electra.config.hidden_size, 2)
+        self.out_proj = torch.nn.Linear(self.electra.config.hidden_size, 3)
         self.gelu = torch.nn.GELU()
 
     def forward(self, features, **kwargs):
