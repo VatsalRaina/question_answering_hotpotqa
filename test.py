@@ -66,10 +66,6 @@ def main(args):
     electra_large = "google/electra-large-discriminator"
     tokenizer = ElectraTokenizer.from_pretrained(electra_large, do_lower_case=True)
 
-    start_positions_true = []
-    end_positions_true = []
-    supporting_facts_start_positions_vector_true = []
-    answer_type_true = []   # 0 indicates 'yes'; 1 indicates 'no'; 2 indicates span
     input_ids = []
     attention_masks = []
     token_type_ids = []
@@ -90,68 +86,10 @@ def main(args):
         inp_att_msk = input_encodings_dict['attention_mask']
         tok_type_ids = [0 if i<= inp_ids.index(102) else 1 for i in range(len(inp_ids))]  # Indicates whether part of sentence A or B -> 102 is Id of [SEP] token
 
-        answer = sample['answer']
-        if answer == 'yes':
-            ans_typ = 0
-            start_idx, end_idx = 0, 0
-        elif answer == 'no':
-            ans_typ = 1
-            start_idx, end_idx = 0, 0
-        else:
-            ans_typ = 2
-            ans_ids = tokenizer.encode(answer)[1:-1]
-            start_idx, end_idx = _find_sub_list(ans_ids, inp_ids)
-            if start_idx == -1:
-                print("Didn't find answer")
-                print(answer)
-                print(context)
-                continue
-
-        # Get positions of supporting facts with 1s at all positions with the sentence start corresponding to a supporting fact
-        supp_start_idxs = []
-        for supp in sample['supporting_facts']:
-            title = supp[0]
-            sentence_num = supp[1]
-            if title == sample["context"][0][0]:
-                if sentence_num >= len(sample["context"][0][1]):
-                    print("Sentence does not exist in context")
-                    continue
-                sentence = sample["context"][0][1][sentence_num]
-            else:
-                assert title == sample["context"][1][0]
-                if sentence_num >= len(sample["context"][1][1]):
-                    print("Sentence does not exist in context")
-                    continue
-                sentence = sample["context"][1][1][sentence_num]
-            supp_ids = tokenizer.encode(sentence)[1:-1]
-            start_pos, _ = _find_sub_list(supp_ids, inp_ids)
-            if start_idx == -1:
-                print("Didn't find supporting fact")
-                print(sentence)
-                print(context)
-                continue
-            supp_start_idxs.append(start_pos)
-        # Build the vector
-        if -1 in supp_start_idxs:
-            continue
-        supp_start_vec = [1 if i in supp_start_idxs else 0 for i in range(len(inp_ids))]
-
-        start_positions_true.append(start_idx)
-        end_positions_true.append(end_idx)
-        supporting_facts_start_positions_vector_true.append(supp_start_vec)
-        answer_type_true.append(ans_typ)
         input_ids.append(inp_ids)
         token_type_ids.append(tok_type_ids)
         attention_masks.append(inp_att_msk)
 
-    start_positions_true = torch.tensor(start_positions_true)
-    start_positions_true = start_positions_true.long().to(device)
-    end_positions_true = torch.tensor(end_positions_true)
-    end_positions_true = end_positions_true.long().to(device)
-    supporting_facts_start_positions_vector_true = torch.tensor(supporting_facts_start_positions_vector_true)
-    supporting_facts_start_positions_vector_true = supporting_facts_start_positions_vector_true.float().to(device)
-    answer_type_true = torch.tensor(answer_type_true)
-    answer_type_true = answer_type_true.long().to(device)
     input_ids = torch.tensor(input_ids)
     input_ids = input_ids.long().to(device)
     token_type_ids = torch.tensor(token_type_ids)
@@ -160,7 +98,7 @@ def main(args):
     attention_masks = attention_masks.long().to(device)
 
 
-    eval_data = TensorDataset(start_positions_true, end_positions_true, supporting_facts_start_positions_vector_true, answer_type_true, input_ids, token_type_ids, attention_masks)
+    eval_data = TensorDataset(input_ids, token_type_ids, attention_masks)
     eval_dataloader = DataLoader(eval_data, batch_size=args.batch_size, shuffle=False)
 
     model = torch.load(args.model_path, map_location=device)
@@ -172,7 +110,7 @@ def main(args):
     pred_suppFacts_logits = []
     count = 0
     print(len(eval_dataloader))
-    for _, _, _, _, b_input_ids, b_tok_typ_ids, b_att_msks in eval_dataloader:
+    for b_input_ids, b_tok_typ_ids, b_att_msks in eval_dataloader:
         print(count)
         count+=1
         b_input_ids, b_tok_typ_ids, b_att_msks = b_input_ids.to(device), b_tok_typ_ids.to(device), b_att_msks.to(device)
