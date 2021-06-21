@@ -139,7 +139,7 @@ def main(args):
                 sentence = sample["context"][1][1][sentence_num]
             supp_ids = tokenizer.encode(sentence)[1:-1]
             start_pos, _ = _find_sub_list(supp_ids, inp_ids)
-            if start_idx == -1:
+            if start_pos == -1:
                 print("Didn't find supporting fact")
                 print(sentence)
                 print(context)
